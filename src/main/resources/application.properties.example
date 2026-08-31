@@ -1,0 +1,58 @@
+# =====================================================================
+#  CONTOH KONFIGURASI - aman untuk dibagikan / di-commit
+#
+#  File ini hanya dokumentasi. Aplikasi TIDAK membacanya.
+#  Yang dibaca aplikasi adalah application.properties, dan file itu
+#  mengambil nilainya dari environment variable.
+#
+#  Tidak ada kredensial sungguhan di sini. Semua nilai di bawah adalah
+#  contoh yang harus Anda ganti sendiri.
+# =====================================================================
+
+# ---------------------------------------------------------------------
+# Cara 1 (dianjurkan) - environment variable
+#
+# PowerShell, hanya berlaku untuk sesi terminal yang sedang terbuka:
+#
+#   $env:DB_URL      = "jdbc:oracle:thin:@localhost:1521/XEPDB1"
+#   $env:DB_USERNAME = "sems_user"
+#   $env:DB_PASSWORD = "GantiDenganPasswordAnda"
+#
+# Agar menetap di seluruh sesi berikutnya (jalankan sekali saja,
+# lalu buka terminal baru):
+#
+#   [Environment]::SetEnvironmentVariable("DB_URL",      "jdbc:oracle:thin:@localhost:1521/XEPDB1", "User")
+#   [Environment]::SetEnvironmentVariable("DB_USERNAME", "sems_user",                               "User")
+#   [Environment]::SetEnvironmentVariable("DB_PASSWORD", "GantiDenganPasswordAnda",                 "User")
+# ---------------------------------------------------------------------
+
+# ---------------------------------------------------------------------
+# Cara 2 - file lokal yang tidak ikut ter-commit
+#
+# Salin blok di bawah ke src/main/resources/application-local.properties
+# (nama file itu sudah masuk .gitignore), lalu jalankan aplikasi dengan:
+#
+#   .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
+#
+# spring.datasource.url=jdbc:oracle:thin:@localhost:1521/XEPDB1
+# spring.datasource.username=sems_user
+# spring.datasource.password=GantiDenganPasswordAnda
+# ---------------------------------------------------------------------
+
+# ---------------------------------------------------------------------
+# Bentuk DB_URL yang umum
+#
+#   Oracle XE 21c, service name PDB (paling umum):
+#     jdbc:oracle:thin:@localhost:1521/XEPDB1
+#
+#   Oracle XE 11g, SID:
+#     jdbc:oracle:thin:@localhost:1521:XE
+#
+#   Server lain / port lain:
+#     jdbc:oracle:thin:@<host>:<port>/<service_name>
+# ---------------------------------------------------------------------
+
+# Nilai-nilai berikut hanyalah CONTOH. Jangan dipakai apa adanya.
+DB_URL=jdbc:oracle:thin:@localhost:1521/XEPDB1
+DB_USERNAME=sems_user
+DB_PASSWORD=ganti-dengan-password-anda

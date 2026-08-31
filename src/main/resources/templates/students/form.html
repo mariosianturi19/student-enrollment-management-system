@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(${mode == 'edit'} ? 'Ubah Mahasiswa' : 'Tambah Mahasiswa', ~{:: konten})}">
+<body>
+
+<div th:fragment="konten">
+
+    <div th:with="isEdit=${mode == 'edit'}">
+
+        <div class="page-head">
+            <div>
+                <h1 class="page-title" th:text="${isEdit} ? 'Ubah Data Mahasiswa' : 'Tambah Mahasiswa'">
+                    Tambah Mahasiswa
+                </h1>
+                <p class="page-subtitle">
+                    Tanda <span style="color: var(--danger);">*</span> menandakan isian wajib.
+                </p>
+            </div>
+            <a th:href="@{/}" class="btn btn-secondary-sems">Batal</a>
+        </div>
+
+        <!-- Ringkasan error di atas form, supaya pengguna tahu ada yang salah
+             tanpa harus menggulir mencari field yang bermasalah. -->
+        <div th:if="${#fields.hasErrors('${form.*}')}" class="alert-sems alert-error-sems" role="alert">
+            <strong>Data belum bisa disimpan.</strong>
+            Periksa kembali isian yang ditandai di bawah.
+        </div>
+
+        <div class="panel">
+            <form th:action="${isEdit}
+                              ? @{/students/{nim}/edit(nim=${originalNim})}
+                              : @{/students}"
+                  th:object="${form}"
+                  method="post"
+                  novalidate
+                  style="padding: var(--sp-5);">
+
+                <!-- NIM.
+                     Saat edit, NIM dikunci: ia primary key dan berperan sebagai
+                     identitas mahasiswa. Oracle juga tidak mendukung
+                     ON UPDATE CASCADE, sehingga mengubah NIM yang sudah punya
+                     baris IRS akan gagal di tingkat constraint. `readonly`
+                     (bukan `disabled`) supaya nilainya tetap ikut ter-submit. -->
+                <div class="form-row">
+                    <label class="form-label-sems" for="nim">
+                        NIM<span class="req" aria-hidden="true">*</span>
+                    </label>
+                    <input type="text"
+                           id="nim"
+                           th:field="*{nim}"
+                           class="form-control-sems mono"
+                           th:classappend="${#fields.hasErrors('nim')} ? ' is-invalid' : ''"
+                           th:aria-invalid="${#fields.hasErrors('nim')} ? 'true' : 'false'"
+                           aria-describedby="nim-hint"
+                           inputmode="numeric"
+                           maxlength="20"
+                           autocomplete="off"
+                           th:readonly="${isEdit}"
+                           required>
+                    <span id="nim-hint" class="field-hint"
+                          th:text="${isEdit}
+                                   ? 'NIM tidak dapat diubah setelah mahasiswa dibuat.'
+                                   : 'Wajib diisi, 8–20 digit angka, dan tidak boleh sama dengan NIM mahasiswa lain.'">
+                        Wajib diisi, 8–20 digit angka, dan tidak boleh sama dengan NIM
+                        mahasiswa lain.
+                    </span>
+                    <span class="field-error"
+                          th:if="${#fields.hasErrors('nim')}"
+                          th:errors="*{nim}">Pesan error NIM</span>
+                </div>
+
+                <!-- Nama -->
+                <div class="form-row">
+                    <label class="form-label-sems" for="nama">
+                        Nama<span class="req" aria-hidden="true">*</span>
+                    </label>
+                    <input type="text"
+                           id="nama"
+                           th:field="*{nama}"
+                           class="form-control-sems"
+                           th:classappend="${#fields.hasErrors('nama')} ? ' is-invalid' : ''"
+                           th:aria-invalid="${#fields.hasErrors('nama')} ? 'true' : 'false'"
+                           aria-describedby="nama-hint"
+                           maxlength="100"
+                           autocomplete="off"
+                           required>
+                    <span id="nama-hint" class="field-hint">Wajib diisi, maksimal 100 karakter.</span>
+                    <span class="field-error"
+                          th:if="${#fields.hasErrors('nama')}"
+                          th:errors="*{nama}">Pesan error nama</span>
+                </div>
+
+                <!-- Angkatan -->
+                <div class="form-row">
+                    <label class="form-label-sems" for="angkatan">
+                        Angkatan<span class="req" aria-hidden="true">*</span>
+                    </label>
+                    <input type="number"
+                           id="angkatan"
+                           th:field="*{angkatan}"
+                           class="form-control-sems mono"
+                           th:classappend="${#fields.hasErrors('angkatan')} ? ' is-invalid' : ''"
+                           th:aria-invalid="${#fields.hasErrors('angkatan')} ? 'true' : 'false'"
+                           aria-describedby="angkatan-hint"
+                           min="2000"
+                           max="2100"
+                           step="1"
+                           style="max-width: 200px;"
+                           required>
+                    <span id="angkatan-hint" class="field-hint">Wajib diisi, tahun antara 2000 dan 2100.</span>
+                    <span class="field-error"
+                          th:if="${#fields.hasErrors('angkatan')}"
+                          th:errors="*{angkatan}">Pesan error angkatan</span>
+                </div>
+
+                <!-- Gender -->
+                <div class="form-row">
+                    <label class="form-label-sems" for="gender">
+                        Gender<span class="req" aria-hidden="true">*</span>
+                    </label>
+                    <select id="gender"
+                            th:field="*{gender}"
+                            class="form-select-sems"
+                            th:classappend="${#fields.hasErrors('gender')} ? ' is-invalid' : ''"
+                            th:aria-invalid="${#fields.hasErrors('gender')} ? 'true' : 'false'"
+                            aria-describedby="gender-hint"
+                            style="max-width: 260px;"
+                            required>
+                        <option value="">— Pilih gender —</option>
+                        <option value="L">Laki-laki</option>
+                        <option value="P">Perempuan</option>
+                    </select>
+                    <span id="gender-hint" class="field-hint">Wajib dipilih.</span>
+                    <span class="field-error"
+                          th:if="${#fields.hasErrors('gender')}"
+                          th:errors="*{gender}">Pesan error gender</span>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary-sems"
+                            th:text="${isEdit} ? 'Simpan Perubahan' : 'Simpan Mahasiswa'">
+                        Simpan
+                    </button>
+                    <a th:href="@{/}" class="btn btn-secondary-sems">Batal</a>
+                </div>
+
+            </form>
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+</html>

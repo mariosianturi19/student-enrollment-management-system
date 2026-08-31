@@ -1,0 +1,651 @@
+/* =====================================================================
+   Student Enrollment Management System
+   Arah visual: "Academic Registrar" - lihat DESIGN_SYSTEM.md
+
+   Lapisan ini menimpa tema default Bootstrap 5. Bootstrap tetap dipakai
+   untuk grid, utility spacing, dan struktur form; warna, tipografi,
+   radius, dan karakter komponen ditentukan di sini.
+   ===================================================================== */
+
+:root {
+    /* Warna */
+    --ink:            #1B2A4A;
+    --ink-soft:       #2C3E63;
+    --paper:          #FAF8F4;
+    --surface:        #FFFFFF;
+    --surface-alt:    #F4F1EA;
+    --border:         #DED8CC;
+    --border-strong:  #C4BBA9;
+    --muted:          #5A6478;
+    --accent:         #1F6F4A;
+    --accent-dark:    #18583B;
+    --accent-tint:    #E8F0EA;
+    --danger:         #8E2A22;
+    --danger-tint:    #F7E9E7;
+    --info-tint:      #E9EDF5;
+
+    /* Tipografi */
+    --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --font-body:    "IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+    --font-mono:    "IBM Plex Mono", Consolas, "Courier New", monospace;
+
+    --fs-display: 1.75rem;
+    --fs-h2:      1.25rem;
+    --fs-body:    0.9375rem;
+    --fs-sm:      0.8125rem;
+    --fs-xs:      0.6875rem;
+
+    /* Spasi - basis 4px */
+    --sp-1:  4px;
+    --sp-2:  8px;
+    --sp-3: 12px;
+    --sp-4: 16px;
+    --sp-5: 24px;
+    --sp-6: 32px;
+    --sp-7: 48px;
+
+    /* Radius sengaja kecil: karakter dokumen resmi, bukan kartu aplikasi */
+    --radius-sm: 3px;
+    --radius-md: 5px;
+
+    /* Satu-satunya shadow di seluruh aplikasi */
+    --shadow-sm: 0 1px 2px rgba(27, 42, 74, .06);
+}
+
+/* ---------------------------------------------------------------- Dasar */
+
+body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-display);
+    color: var(--ink);
+    font-weight: 600;
+}
+
+a {
+    color: var(--accent);
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+}
+
+a:hover {
+    color: var(--accent-dark);
+}
+
+/* Fokus keyboard harus selalu terlihat jelas */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    box-shadow: none;
+}
+
+.mono {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -.01em;
+}
+
+/* --------------------------------------------------------- Header aplikasi */
+
+.app-header {
+    background-color: var(--ink);
+    color: #FFFFFF;
+    height: 56px;
+    display: flex;
+    align-items: center;
+}
+
+/* Kontainer di dalam header/footer memakai .page untuk menyamakan lebar
+   dan margin kiri-kanan dengan konten utama, tetapi tanpa padding vertikal. */
+.header-inner,
+.footer-inner {
+    padding-top: 0;
+    padding-bottom: 0;
+    width: 100%;
+}
+
+.app-header a.brand {
+    color: #FFFFFF;
+    text-decoration: none;
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+}
+
+.app-header .brand-mark {
+    font-family: var(--font-mono);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    letter-spacing: .14em;
+    padding: 2px var(--sp-2);
+    border: 1px solid rgba(255, 255, 255, .35);
+    border-radius: var(--radius-sm);
+}
+
+.app-header .brand-name {
+    font-family: var(--font-display);
+    font-size: 1.0625rem;
+    letter-spacing: .01em;
+}
+
+.app-header .brand-sub {
+    font-size: var(--fs-sm);
+    color: rgba(255, 255, 255, .62);
+}
+
+/* -------------------------------------------------------------- Kerangka */
+
+.page {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--sp-6) var(--sp-5) var(--sp-7);
+}
+
+.page-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding-bottom: var(--sp-3);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: var(--sp-5);
+}
+
+.page-title {
+    font-size: var(--fs-display);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.page-subtitle {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+    margin: var(--sp-1) 0 0;
+}
+
+.panel {
+    background-color: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+}
+
+.panel-head {
+    padding: var(--sp-4) var(--sp-5);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+}
+
+.panel-title {
+    font-size: var(--fs-h2);
+    margin: 0;
+}
+
+.panel-meta {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+}
+
+/* ---------------------------------------------------------------- Tabel */
+
+.table-sems {
+    width: 100%;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.table-sems thead th {
+    background-color: var(--surface-alt);
+    color: var(--muted);
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+}
+
+.table-sems tbody td {
+    padding: var(--sp-3) var(--sp-4);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+}
+
+.table-sems tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-sems tbody tr:hover {
+    background-color: var(--surface-alt);
+}
+
+.table-sems .col-actions {
+    text-align: right;
+    white-space: nowrap;
+}
+
+.table-sems .cell-name {
+    font-weight: 500;
+}
+
+/* ---------------------------------------------------------------- Tombol */
+
+.btn {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    border-radius: var(--radius-sm);
+    padding: var(--sp-2) var(--sp-4);
+    min-height: 38px;
+    border: 1px solid transparent;
+    transition: background-color .12s ease, color .12s ease, border-color .12s ease;
+}
+
+.btn-primary-sems {
+    background-color: var(--accent);
+    border-color: var(--accent);
+    color: #FFFFFF;
+}
+
+.btn-primary-sems:hover {
+    background-color: var(--accent-dark);
+    border-color: var(--accent-dark);
+    color: #FFFFFF;
+}
+
+.btn-secondary-sems {
+    background-color: transparent;
+    border-color: var(--border-strong);
+    color: var(--ink);
+}
+
+.btn-secondary-sems:hover {
+    background-color: var(--surface-alt);
+    border-color: var(--ink);
+    color: var(--ink);
+}
+
+.btn-danger-sems {
+    background-color: transparent;
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+.btn-danger-sems:hover {
+    background-color: var(--danger);
+    border-color: var(--danger);
+    color: #FFFFFF;
+}
+
+.btn-sm-sems {
+    font-size: var(--fs-sm);
+    padding: var(--sp-1) var(--sp-3);
+    min-height: 32px;
+}
+
+.action-group {
+    display: inline-flex;
+    gap: var(--sp-2);
+    align-items: center;
+}
+
+/* ------------------------------------------------------- Badge status IRS */
+
+.badge-status {
+    display: inline-block;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    padding: 2px var(--sp-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid transparent;
+    text-transform: capitalize;
+}
+
+.badge-lulus  { color: var(--accent); background-color: var(--accent-tint); border-color: #CFE2D6; }
+.badge-aktif  { color: var(--ink);    background-color: var(--info-tint);   border-color: #D3DAE8; }
+.badge-gagal  { color: var(--danger); background-color: var(--danger-tint); border-color: #EBD0CC; }
+.badge-netral { color: var(--muted);  background-color: var(--surface-alt); border-color: var(--border); }
+
+/* ----------------------------------------------------------- Empty state */
+
+.empty-state {
+    border: 1px dashed var(--border-strong);
+    border-radius: var(--radius-md);
+    background-color: var(--surface-alt);
+    padding: var(--sp-7) var(--sp-5);
+    text-align: center;
+    margin: var(--sp-5);
+}
+
+.empty-state .empty-title {
+    font-family: var(--font-display);
+    font-size: var(--fs-h2);
+    margin: 0 0 var(--sp-2);
+    color: var(--ink);
+}
+
+.empty-state .empty-text {
+    color: var(--muted);
+    font-size: var(--fs-sm);
+    margin: 0 auto var(--sp-4);
+    max-width: 42ch;
+}
+
+/* ----------------------------------------------------------------- Form */
+
+.form-label-sems {
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: var(--sp-1);
+    display: block;
+}
+
+.form-label-sems .req {
+    color: var(--danger);
+    margin-left: 2px;
+}
+
+.form-control-sems,
+.form-select-sems {
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    padding: var(--sp-2) var(--sp-3);
+    min-height: 40px;
+    background-color: var(--surface);
+    color: var(--ink);
+    width: 100%;
+}
+
+.form-control-sems:focus,
+.form-select-sems:focus {
+    border-color: var(--accent);
+    outline: 2px solid var(--accent);
+    outline-offset: 0;
+    box-shadow: none;
+}
+
+.form-control-sems.is-invalid,
+.form-select-sems.is-invalid {
+    border-color: var(--danger);
+    background-image: none;   /* ikon peringatan bawaan Bootstrap tidak dipakai */
+}
+
+.form-control-sems.is-invalid:focus,
+.form-select-sems.is-invalid:focus {
+    outline-color: var(--danger);
+}
+
+.form-control-sems[readonly] {
+    background-color: var(--surface-alt);
+    color: var(--muted);
+}
+
+.field-error {
+    display: block;
+    color: var(--danger);
+    font-size: var(--fs-sm);
+    margin-top: var(--sp-1);
+}
+
+.field-hint {
+    display: block;
+    color: var(--muted);
+    font-size: var(--fs-sm);
+    margin-top: var(--sp-1);
+}
+
+.form-row {
+    margin-bottom: var(--sp-5);
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--sp-3);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--border);
+    margin-top: var(--sp-5);
+}
+
+/* ---------------------------------------------------------------- Alert */
+
+.alert-sems {
+    border-radius: var(--radius-sm);
+    border: 1px solid;
+    padding: var(--sp-3) var(--sp-4);
+    font-size: var(--fs-body);
+    margin-bottom: var(--sp-5);
+}
+
+.alert-success-sems {
+    background-color: var(--accent-tint);
+    border-color: #CFE2D6;
+    color: var(--accent-dark);
+}
+
+.alert-error-sems {
+    background-color: var(--danger-tint);
+    border-color: #EBD0CC;
+    color: var(--danger);
+}
+
+/* --------------------------------------------------------- Daftar definisi */
+
+.def-list {
+    display: grid;
+    grid-template-columns: 140px 1fr;
+    gap: var(--sp-3) var(--sp-4);
+    margin: 0;
+    padding: var(--sp-5);
+}
+
+.def-list dt {
+    font-size: var(--fs-sm);
+    color: var(--muted);
+    font-weight: 500;
+}
+
+.def-list dd {
+    margin: 0;
+    color: var(--ink);
+}
+
+/* --------------------------------------------------------------- Footer */
+
+.app-footer {
+    border-top: 1px solid var(--border);
+    margin-top: var(--sp-7);
+    padding: var(--sp-4) 0;
+    font-size: var(--fs-sm);
+    color: var(--muted);
+    text-align: center;
+}
+
+/* =====================================================================
+   Responsif
+   ===================================================================== */
+
+@media (max-width: 767.98px) {
+
+    .page {
+        padding: var(--sp-5) var(--sp-4) var(--sp-6);
+    }
+
+    .page-head {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--sp-3);
+    }
+
+    .page-head .btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    /* Tabel daftar mahasiswa berubah menjadi tumpukan kartu.
+       Markup tetap <table> sehingga struktur semantiknya utuh; hanya
+       tampilannya yang diubah, dan label kolom dibawa lewat data-label. */
+    .table-stack thead {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
+    }
+
+    .table-stack tbody tr {
+        display: block;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        background-color: var(--surface);
+        padding: var(--sp-4);
+        margin: var(--sp-4);
+    }
+
+    .table-stack tbody tr:hover {
+        background-color: var(--surface);
+    }
+
+    .table-stack tbody td {
+        display: block;
+        border: none;
+        padding: 0;
+    }
+
+    .table-stack tbody td[data-label]::before {
+        content: attr(data-label);
+        display: block;
+        font-size: var(--fs-xs);
+        text-transform: uppercase;
+        letter-spacing: .06em;
+        color: var(--muted);
+        margin-top: var(--sp-3);
+        margin-bottom: 2px;
+    }
+
+    /* Nama menjadi judul kartu, tanpa label */
+    .table-stack tbody td.cell-name {
+        font-family: var(--font-display);
+        font-size: 1.0625rem;
+        font-weight: 600;
+    }
+
+    .table-stack tbody td.cell-name::before {
+        content: none;
+    }
+
+    .table-stack .col-actions {
+        text-align: left;
+        margin-top: var(--sp-4);
+        padding-top: var(--sp-3);
+        border-top: 1px solid var(--border);
+    }
+
+    .table-stack .col-actions::before {
+        content: none;
+    }
+
+    .table-stack .action-group {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--sp-2);
+        width: 100%;
+    }
+
+    .table-stack .action-group .btn,
+    .table-stack .action-group form,
+    .table-stack .action-group form .btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    /* Tabel mata kuliah: SKS dan Hari pindah ke baris meta di bawah nama */
+    .table-courses .col-collapse {
+        display: none;
+    }
+
+    .table-courses .course-meta {
+        display: block;
+        font-size: var(--fs-sm);
+        color: var(--muted);
+        margin-top: 2px;
+    }
+
+    .def-list {
+        grid-template-columns: 1fr;
+        gap: var(--sp-1) 0;
+    }
+
+    .def-list dd {
+        margin-bottom: var(--sp-3);
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .form-actions .btn {
+        width: 100%;
+        min-height: 44px;
+    }
+
+    .empty-state {
+        margin: var(--sp-4);
+        padding: var(--sp-6) var(--sp-4);
+    }
+}
+
+/* Meta mata kuliah hanya muncul di mobile */
+@media (min-width: 768px) {
+    .table-courses .course-meta {
+        display: none;
+    }
+}
+
+@media (max-width: 575.98px) {
+    :root {
+        --fs-display: 1.375rem;
+    }
+
+    .app-header .brand-sub {
+        display: none;
+    }
+}
+
+/* ---------------------------------------------------------------- Cetak */
+
+@media print {
+    .app-header,
+    .app-footer,
+    .col-actions,
+    .page-head .btn {
+        display: none;
+    }
+
+    body {
+        background: #FFFFFF;
+    }
+
+    .panel {
+        border-color: #999;
+        box-shadow: none;
+    }
+}

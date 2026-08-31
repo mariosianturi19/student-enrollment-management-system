@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(${errorJudul} ?: 'Terjadi Kesalahan', ~{:: konten})}">
+<body>
+
+<div th:fragment="konten">
+
+    <div class="page-head">
+        <div>
+            <h1 class="page-title" th:text="${errorJudul} ?: 'Terjadi kesalahan'">Terjadi kesalahan</h1>
+            <p class="page-subtitle">Permintaan Anda tidak dapat diselesaikan.</p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="empty-state">
+            <h2 class="empty-title">Aplikasi tidak dapat melanjutkan</h2>
+            <p class="empty-text"
+               th:text="${errorPesan} ?: 'Silakan kembali ke daftar mahasiswa dan coba lagi. Bila kesalahan berulang, periksa log aplikasi di terminal.'">
+                Silakan kembali ke daftar mahasiswa dan coba lagi.
+            </p>
+            <a th:href="@{/}" class="btn btn-primary-sems">Kembali ke Daftar Mahasiswa</a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

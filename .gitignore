@@ -1,0 +1,32 @@
+# Build output
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Konfigurasi lokal yang berisi kredensial - JANGAN pernah di-commit
+.env
+.env.*
+application-local.properties
+src/main/resources/application-local.properties
+
+# Working log kept local, not part of the public repo
+PROGRESS.md
+
+# Log
+*.log
+logs/
+
+# IDE
+.idea/
+*.iml
+*.iws
+*.ipr
+.vscode/
+.settings/
+.classpath
+.project
+nbproject/private/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store

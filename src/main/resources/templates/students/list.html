@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Daftar Mahasiswa', ~{:: konten})}">
+<body>
+
+<div th:fragment="konten">
+
+    <div class="page-head">
+        <div>
+            <h1 class="page-title">Daftar Mahasiswa</h1>
+            <p class="page-subtitle">
+                <span th:if="${#lists.isEmpty(students)}">Belum ada data mahasiswa.</span>
+                <span th:unless="${#lists.isEmpty(students)}"
+                      th:text="${#lists.size(students)} + ' mahasiswa terdaftar'">0 mahasiswa terdaftar</span>
+            </p>
+        </div>
+        <a th:href="@{/students/new}" class="btn btn-primary-sems">Tambah Mahasiswa</a>
+    </div>
+
+    <!-- Empty state: belum ada satu pun mahasiswa di database -->
+    <div th:if="${#lists.isEmpty(students)}" class="panel">
+        <div class="empty-state">
+            <h2 class="empty-title">Belum ada mahasiswa</h2>
+            <p class="empty-text">
+                Data mahasiswa belum tersedia. Tambahkan mahasiswa pertama lewat tombol
+                di bawah, atau jalankan <span class="mono">seed.sql</span> untuk memuat
+                data contoh.
+            </p>
+            <a th:href="@{/students/new}" class="btn btn-primary-sems">Tambah Mahasiswa</a>
+        </div>
+    </div>
+
+    <!-- Tabel. Di layar di bawah 768px, kelas .table-stack mengubahnya
+         menjadi tumpukan kartu; markup tetap tabel sehingga struktur
+         semantiknya utuh untuk pembaca layar. -->
+    <div th:unless="${#lists.isEmpty(students)}" class="panel">
+        <table class="table-sems table-stack">
+            <caption class="visually-hidden">
+                Daftar mahasiswa terdaftar beserta angkatan, gender, dan aksi yang tersedia
+            </caption>
+            <thead>
+            <tr>
+                <th scope="col">NIM</th>
+                <th scope="col">Nama</th>
+                <th scope="col">Angkatan</th>
+                <th scope="col">Gender</th>
+                <th scope="col" class="col-actions">Aksi</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="s : ${students}">
+                <td class="mono" data-label="NIM" th:text="${s.nim}">24060122001</td>
+                <td class="cell-name" th:text="${s.nama}">Nama Mahasiswa</td>
+                <td class="mono" data-label="Angkatan" th:text="${s.angkatan}">2022</td>
+                <td data-label="Gender" th:text="${s.genderLabel()}">Perempuan</td>
+                <td class="col-actions">
+                    <div class="action-group">
+                        <a class="btn btn-secondary-sems btn-sm-sems"
+                           th:href="@{/students/{nim}(nim=${s.nim})}"
+                           th:aria-label="'Lihat detail ' + ${s.nama}">Detail</a>
+
+                        <a class="btn btn-secondary-sems btn-sm-sems"
+                           th:href="@{/students/{nim}/edit(nim=${s.nim})}"
+                           th:aria-label="'Ubah data ' + ${s.nama}">Edit</a>
+
+                        <!-- Hapus memakai POST, bukan tautan GET, supaya tidak bisa
+                             terpicu hanya dengan membuka URL atau oleh prefetch
+                             peramban. Dialog konfirmasi dipasang oleh app.js lewat
+                             atribut data-confirm. -->
+                        <form th:action="@{/students/{nim}/delete(nim=${s.nim})}"
+                              method="post"
+                              th:data-confirm="'Hapus mahasiswa ' + ${s.nama} + '? Data IRS miliknya ikut terhapus.'">
+                            <button type="submit" class="btn btn-danger-sems btn-sm-sems"
+                                    th:aria-label="'Hapus ' + ${s.nama}">Hapus</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout(${mahasiswa.nama}, ~{:: konten})}">
+<body>
+
+<div th:fragment="konten">
+
+    <div class="page-head">
+        <div>
+            <h1 class="page-title" th:text="${mahasiswa.nama}">Nama Mahasiswa</h1>
+            <p class="page-subtitle">
+                NIM <span class="mono" th:text="${mahasiswa.nim}">24060122001</span>
+            </p>
+        </div>
+        <a th:href="@{/}" class="btn btn-secondary-sems">Kembali ke Daftar</a>
+    </div>
+
+    <!-- Biodata -->
+    <section class="panel" style="margin-bottom: var(--sp-5);">
+        <div class="panel-head">
+            <h2 class="panel-title">Biodata</h2>
+        </div>
+        <dl class="def-list">
+            <dt>NIM</dt>
+            <dd class="mono" th:text="${mahasiswa.nim}">24060122001</dd>
+
+            <dt>Nama</dt>
+            <dd th:text="${mahasiswa.nama}">Nama Mahasiswa</dd>
+
+            <dt>Angkatan</dt>
+            <dd class="mono" th:text="${mahasiswa.angkatan}">2022</dd>
+
+            <dt>Gender</dt>
+            <dd th:text="${mahasiswa.genderLabel()}">Perempuan</dd>
+        </dl>
+    </section>
+
+    <!-- Mata kuliah yang diambil - hasil satu query JOIN
+         MAHASISWA x IRS x MATA_KULIAH -->
+    <section class="panel">
+        <div class="panel-head">
+            <h2 class="panel-title">Mata Kuliah yang Diambil</h2>
+            <span class="panel-meta" th:if="${detail.hasCourses()}"
+                  th:text="${#lists.size(courses)} + ' mata kuliah · ' + ${detail.totalSks()} + ' SKS'">
+                3 mata kuliah · 10 SKS
+            </span>
+        </div>
+
+        <!-- Empty state: mahasiswa ada, tetapi belum mengambil mata kuliah apa pun.
+             Kasus ini muncul karena query memakai LEFT JOIN, sehingga mahasiswa
+             tanpa baris IRS tetap ditemukan. -->
+        <div th:unless="${detail.hasCourses()}" class="empty-state">
+            <h3 class="empty-title">Belum ada mata kuliah</h3>
+            <p class="empty-text">
+                Mahasiswa ini belum mengambil mata kuliah apa pun. Data pengambilan
+                mata kuliah tersimpan di tabel <span class="mono">IRS</span> dan
+                dapat ditambahkan lewat <span class="mono">seed.sql</span> atau
+                langsung di database.
+            </p>
+        </div>
+
+        <table th:if="${detail.hasCourses()}" class="table-sems table-courses">
+            <caption class="visually-hidden">
+                Mata kuliah yang diambil beserta jumlah SKS, hari kuliah, dan status pengambilan
+            </caption>
+            <thead>
+            <tr>
+                <th scope="col">Mata Kuliah</th>
+                <th scope="col" class="col-collapse">SKS</th>
+                <th scope="col" class="col-collapse">Hari</th>
+                <th scope="col">Status</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="c : ${courses}">
+                <td>
+                    <span class="cell-name" th:text="${c.matkulNama}">Sistem Basis Data</span>
+                    <span class="mono" style="color: var(--muted); font-size: var(--fs-sm);"
+                          th:text="' · ' + ${c.matkulId}"> · IF2101</span>
+                    <!-- Di mobile, SKS dan Hari pindah ke sini karena kolomnya disembunyikan -->
+                    <span class="course-meta"
+                          th:text="${c.sks} + ' SKS · ' + ${c.hari}">3 SKS · Senin</span>
+                </td>
+                <td class="mono col-collapse" th:text="${c.sks}">3</td>
+                <td class="col-collapse" th:text="${c.hari}">Senin</td>
+                <td>
+                    <span th:class="${c.statusBadgeClass()}" th:text="${c.status}">aktif</span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+</div>
+
+</body>
+</html>

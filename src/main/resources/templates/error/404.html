@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id" xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: layout('Tidak Ditemukan', ~{:: konten})}">
+<body>
+
+<div th:fragment="konten">
+
+    <div class="page-head">
+        <div>
+            <h1 class="page-title">Mahasiswa tidak ditemukan</h1>
+            <p class="page-subtitle">Halaman yang Anda tuju tidak tersedia.</p>
+        </div>
+    </div>
+
+    <div class="panel">
+        <div class="empty-state">
+            <h2 class="empty-title">Data tidak ada di database</h2>
+            <p class="empty-text">
+                Tidak ada mahasiswa dengan NIM
+                <span class="mono" th:if="${nim}" th:text="${nim}">-</span>
+                <span th:unless="${nim}">tersebut</span>.
+                Mungkin datanya sudah dihapus, atau NIM pada alamat halaman salah ketik.
+            </p>
+            <a th:href="@{/}" class="btn btn-primary-sems">Kembali ke Daftar Mahasiswa</a>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>
