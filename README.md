@@ -4,7 +4,7 @@ A small Spring Boot web application for managing students and the courses they
 enrol in, backed by an Oracle relational database accessed through
 `JdbcTemplate` (no ORM).
 
-> **Context.** This is a personal recreation of a university database practicum —
+> **Context.** This is a personal recreation of a university database practicum,
 > a coursework-scale app, not a production system. There is deliberately no
 > authentication, authorization, CSRF protection, or audit logging (see
 > [Scope & security](#scope--security)). The point of the project is clean
@@ -27,14 +27,14 @@ detail page (JOIN result), and the 404 page will be added here._
 | Bootstrap | 5.3.3 (CDN) | Grid and utilities |
 | Maven Wrapper | → Maven 3.9.x | No separate Maven install needed |
 
-There is no second database and no embedded/H2 fallback — the app talks to
+There is no second database and no embedded/H2 fallback. The app talks to
 Oracle or it does not run.
 
 ## Architecture
 
 ```
 src/main/java/com/togar/studentenrollment/
-├── controller/   HTTP routes only — no SQL, no business rules
+├── controller/   HTTP routes only, no SQL and no business rules
 │   └── GlobalExceptionHandler   maps domain exceptions to 404 / error pages
 ├── service/      Business rules (duplicate NIM, missing NIM) + @Transactional
 ├── repository/   The only place SQL is written (JdbcTemplate)
@@ -57,7 +57,7 @@ with 10 courses is still 1 round-trip, not 11.
 
 **`LEFT JOIN`, not `INNER JOIN`.** A student who has enrolled in nothing must
 still resolve to one row (with `NULL` course columns) so the page renders an
-empty state — `INNER JOIN` would return zero rows and the app would wrongly show
+empty state. `INNER JOIN` would return zero rows and the app would wrongly show
 a 404. `NULL` rows are then dropped while building the course list.
 
 **Parameterized SQL everywhere.** Every external value goes to `JdbcTemplate` as
@@ -66,14 +66,14 @@ injection surface. `MahasiswaRepository` documents this per method.
 
 **`ON DELETE CASCADE` only where it is correct.** The `IRS → MAHASISWA` foreign
 key cascades, so deleting a student cleans up their enrolment rows. The
-`IRS → MATA_KULIAH` key deliberately does **not** cascade — a course that
+`IRS → MATA_KULIAH` key deliberately does **not** cascade, because a course that
 students are still taking should refuse to be deleted, not silently drop
 enrolments.
 
 **NIM is immutable.** It is the primary key and the student's identity, and
 Oracle has no `ON UPDATE CASCADE`. The edit form renders NIM read-only and the
 controller always takes NIM from the path, never the request body, so the
-primary key can never be rewritten — even by a tampered request.
+primary key can never be rewritten, even by a tampered request.
 
 ## Testing
 
@@ -83,7 +83,7 @@ primary key can never be rewritten — even by a tampered request.
 
 **The tests need no database.** They run on `@WebMvcTest` / plain Mockito with a
 mocked service, so no `DataSource` is created and no JDBC connection is
-attempted — `.\mvnw.cmd test` passes even with `DB_URL` / `DB_USERNAME` /
+attempted, so `.\mvnw.cmd test` passes even with `DB_URL` / `DB_USERNAME` /
 `DB_PASSWORD` unset.
 
 | Class | Tests | Covers |
@@ -104,7 +104,7 @@ Docker) plus a troubleshooting table are in
    `seed.sql` against your Oracle user (via SQL\*Plus or SQL Developer). Both are
    safe to re-run.
 
-2. **Provide the connection via environment variables** — no credentials are
+2. **Provide the connection via environment variables.** No credentials are
    stored in the repo (`application.properties` only holds `${DB_URL}`
    placeholders). See [`application.properties.example`](src/main/resources/application.properties.example).
 
@@ -141,8 +141,8 @@ Mutations are POST-only. Opening `/students/{nim}/delete` in a browser returns
 
 | Table | Key columns | Notes |
 |---|---|---|
-| `MAHASISWA` | `NIM` (PK) | `NAMA`, `ANGKATAN` (2000–2100), `GENDER` (`L`/`P`), all `CHECK`-constrained |
-| `MATA_KULIAH` | `MATKUL_ID` (PK) | `MATKUL_NAMA`, `SKS` (1–6), `HARI` (Senin–Sabtu) |
+| `MAHASISWA` | `NIM` (PK) | `NAMA`, `ANGKATAN` (2000-2100), `GENDER` (`L`/`P`), all `CHECK`-constrained |
+| `MATA_KULIAH` | `MATKUL_ID` (PK) | `MATKUL_NAMA`, `SKS` (1-6), `HARI` (Senin-Sabtu) |
 | `IRS` | `IRS_ID` (PK) | `NIM` → `MAHASISWA` `ON DELETE CASCADE`; `MATKUL_ID` → `MATA_KULIAH`; `STATUS` (`aktif`/`lulus`/`gagal`); `UNIQUE (NIM, MATKUL_ID)` |
 
 `UNIQUE (NIM, MATKUL_ID)` stops a student enrolling in the same course twice.
@@ -151,14 +151,14 @@ Mutations are POST-only. Opening `/students/{nim}/delete` in a browser returns
 
 **Applied:**
 
-- No credentials in code — connection comes from environment variables.
+- No credentials in code; the connection comes from environment variables.
 - All SQL is parameterized; no injection surface.
 - Server-side validation on every field (forms carry `novalidate` so the tested
   server path is the one that runs).
-- Thymeleaf auto-escaping — a name containing `<script>` renders as text.
+- Thymeleaf auto-escaping, so a name containing `<script>` renders as text.
 - Mutations are POST-only; deletion cannot be triggered by GET or prefetch.
 - Stack traces are never sent to the browser (`server.error.include-stacktrace=never`).
-- `spring.sql.init.mode=never` — running the app never alters your schema.
+- `spring.sql.init.mode=never`, so running the app never alters your schema.
 
 **Deliberately out of scope** (a real deployment would need these): authentication
 and authorization, CSRF protection, rate limiting, audit logging, and data

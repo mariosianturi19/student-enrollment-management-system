@@ -8,12 +8,12 @@ screenshot checklist. For an overview of the project, see the
 ## Contents
 
 1. [Prerequisites](#prerequisites)
-2. [Step 0 — Install Oracle XE](#step-0--install-oracle-xe)
-3. [Step 1 — Create the application user](#step-1--create-the-application-user)
-4. [Step 2 — Run schema.sql and seed.sql](#step-2--run-schemasql-and-seedsql)
+2. [Step 0: Install Oracle XE](#step-0-install-oracle-xe)
+3. [Step 1: Create the application user](#step-1-create-the-application-user)
+4. [Step 2: Run schema.sql and seed.sql](#step-2-run-schemasql-and-seedsql)
 5. [Inspecting the database](#inspecting-the-database)
-6. [Step 3 — Environment variables](#step-3--environment-variables)
-7. [Step 4 — Run the application](#step-4--run-the-application)
+6. [Step 3: Environment variables](#step-3-environment-variables)
+7. [Step 4: Run the application](#step-4-run-the-application)
 8. [Running the tests](#running-the-tests)
 9. [Screenshot checklist](#screenshot-checklist)
 10. [Troubleshooting](#troubleshooting)
@@ -22,11 +22,11 @@ screenshot checklist. For an overview of the project, see the
 
 ## Prerequisites
 
-1. **JDK 17** — check with `java -version`.
+1. **JDK 17**, check with `java -version`.
 2. **Oracle Database XE** (21c or 18c) running.
 3. **SQL\*Plus** or **SQL Developer** to run the SQL scripts.
 
-Maven does **not** need to be installed — the project ships the Maven Wrapper
+Maven does **not** need to be installed; the project ships the Maven Wrapper
 (`mvnw` / `mvnw.cmd`).
 
 ### If `JAVA_HOME` is not set
@@ -49,7 +49,7 @@ $env:JAVA_HOME = "C:\Program Files\Eclipse Adoptium\jdk-17.0.14.7-hotspot"
 
 ---
 
-## Step 0 — Install Oracle XE
+## Step 0: Install Oracle XE
 
 Skip if Oracle is already installed. Check with:
 
@@ -65,8 +65,8 @@ No output means Oracle is not installed.
    <https://www.oracle.com/database/technologies/xe-downloads.html> (free Oracle
    account required). About 2 GB.
 2. Extract, run `setup.exe`, follow the wizard. You will be asked to set a
-   password for `SYS` / `SYSTEM` — **note it down**, it is needed in Step 1.
-3. Installation takes 15–30 minutes and creates two Windows services:
+   password for `SYS` / `SYSTEM`. **Note it down**, it is needed in Step 1.
+3. Installation takes 15-30 minutes and creates two Windows services:
    `OracleServiceXE` and `OracleOraDB21Home1TNSListener`.
 
 After installation, confirm both services run:
@@ -82,7 +82,7 @@ Administrator and:
 Start-Service OracleServiceXE, OracleOraDB21Home1TNSListener
 ```
 
-### Alternative — Oracle XE via Docker
+### Alternative: Oracle XE via Docker
 
 Lighter path if you have Docker: ~755 MB download (not ~2 GB), no Oracle
 account, no permanent Windows service, removable with one command.
@@ -96,17 +96,17 @@ docker run -d --name sems-oracle -p 1521:1521 `
 ```
 
 `APP_USER` / `APP_USER_PASSWORD` create `sems_user` automatically with
-`CONNECT` + `RESOURCE` and `UNLIMITED` quota — exactly what
-[Step 1](#step-1--create-the-application-user) does, so **Step 1 can be skipped**
+`CONNECT` + `RESOURCE` and `UNLIMITED` quota, exactly what
+[Step 1](#step-1-create-the-application-user) does, so **Step 1 can be skipped**
 on this path.
 
-First-time database init takes ~5–10 minutes. Wait for:
+First-time database init takes ~5-10 minutes. Wait for:
 
 ```powershell
 docker logs sems-oracle | Select-String "DATABASE IS READY TO USE"
 ```
 
-Test the connection (no need for `sqlplus` on Windows — use the one inside the
+Test the connection (no need for `sqlplus` on Windows; use the one inside the
 container):
 
 ```powershell
@@ -114,9 +114,9 @@ docker exec -it sems-oracle sqlplus sems_user/YourPassword@localhost:1521/XEPDB1
 ```
 
 The service name is `XEPDB1`, same as the XE installer, so `DB_URL` in
-[Step 3](#step-3--environment-variables) does not change.
+[Step 3](#step-3-environment-variables) does not change.
 
-Running the SQL scripts on the Docker path — copy them in first:
+Running the SQL scripts on the Docker path, copy them in first:
 
 ```powershell
 docker cp src\main\resources\sql\schema.sql sems-oracle:/tmp/schema.sql
@@ -133,7 +133,7 @@ docker start sems-oracle    # start again
 docker rm -f sems-oracle    # remove entirely, data included
 ```
 
-> The container has no volume, so `docker rm` deletes its data too — for a
+> The container has no volume, so `docker rm` deletes its data too. For a
 > coursework app that is convenient (just re-run `schema.sql` and `seed.sql`).
 > To persist data, add `-v sems-oracle-data:/opt/oracle/oradata` to `docker run`.
 
@@ -146,7 +146,7 @@ do not pick that up. **Close and reopen PowerShell**, then:
 sqlplus -V
 ```
 
-Still not found — call it by full path (adjust the version):
+Still not found? Call it by full path (adjust the version):
 
 ```powershell
 & "C:\app\$env:USERNAME\product\21c\dbhomeXE\bin\sqlplus.exe" -V
@@ -160,12 +160,12 @@ $sql = "C:\app\$env:USERNAME\product\21c\dbhomeXE\bin\sqlplus.exe"
 
 ---
 
-## Step 1 — Create the application user
+## Step 1: Create the application user
 
 Create a dedicated database user for the app. Do not use `SYS` or `SYSTEM`.
-(Skip this step on the Docker path — `sems_user` already exists.)
+(Skip this step on the Docker path; `sems_user` already exists.)
 
-Connect as administrator — mind the **quotes**:
+Connect as administrator, minding the **quotes**:
 
 ```powershell
 sqlplus "sys/YourSysPassword@localhost:1521/XEPDB1 as sysdba"
@@ -188,7 +188,7 @@ EXIT;
 
 ---
 
-## Step 2 — Run schema.sql and seed.sql
+## Step 2: Run schema.sql and seed.sql
 
 > **PowerShell users:** `@` is the splatting operator, so `@schema.sql` is parsed
 > as a variable and errors with `SplattingNotPermitted`. Arguments containing `@`
@@ -205,7 +205,7 @@ sqlplus "sems_user/YourPassword@localhost:1521/XEPDB1" "@seed.sql"
 cd ..\..\..\..
 ```
 
-Alternative — connect first, then run the scripts:
+Alternative: connect first, then run the scripts:
 
 ```powershell
 sqlplus "sems_user/YourPassword@localhost:1521/XEPDB1"
@@ -225,17 +225,17 @@ EXIT;
 **Expected after `seed.sql`:** a row-count check reading `4 / 4 / 7`
 (`mahasiswa` / `mata_kuliah` / `irs`) and a sample JOIN result.
 
-Both scripts are safe to re-run — existing tables are dropped first.
+Both scripts are safe to re-run; existing tables are dropped first.
 
 ---
 
 ## Inspecting the database
 
-### a. `lihat.sql` — quickest for documentation screenshots
+### a. `lihat.sql`, quickest for documentation screenshots
 
 `src/main/resources/sql/lihat.sql` prints all three tables, the JOIN result, row
 counts, table structure (`DESC`), and the constraint list in one run, with column
-widths pre-set so output does not wrap. It is **read-only** — only `SELECT` and
+widths pre-set so output does not wrap. It is **read-only**: only `SELECT` and
 `DESC`.
 
 ```powershell
@@ -277,11 +277,11 @@ COLUMN nama FORMAT A26
 | Username | `sems_user` |
 | Password | your chosen password |
 
-Choose **Service name**, not SID — the wrong choice gives `ORA-12514`.
+Choose **Service name**, not SID. The wrong choice gives `ORA-12514`.
 
 ---
 
-## Step 3 — Environment variables
+## Step 3: Environment variables
 
 The app stores **no** credentials in any file. Values are read from environment
 variables at startup.
@@ -311,7 +311,7 @@ Common `DB_URL` forms:
 
 ---
 
-## Step 4 — Run the application
+## Step 4: Run the application
 
 ```powershell
 .\mvnw.cmd spring-boot:run
@@ -319,7 +319,7 @@ Common `DB_URL` forms:
 
 Then open <http://localhost:8080>. Stop with `Ctrl + C`.
 
-Alternative — run from the JAR:
+Alternative: run from the JAR:
 
 ```powershell
 .\mvnw.cmd clean package
@@ -356,8 +356,8 @@ and repeat the ones marked 📱 at mobile width (DevTools → device toolbar →
 
 **Database:**
 
-- [ ] 1. SQL\*Plus output after `@schema.sql` — `Table created.` three times
-- [ ] 2. SQL\*Plus output after `@seed.sql` — row counts `4 / 4 / 7`
+- [ ] 1. SQL\*Plus output after `@schema.sql`, `Table created.` three times
+- [ ] 2. SQL\*Plus output after `@seed.sql`, row counts `4 / 4 / 7`
 - [ ] 3. `SELECT * FROM mahasiswa;`
 - [ ] 4. Manual JOIN result for one NIM (also printed at the end of `seed.sql`)
 - [ ] 5. Table structure: `DESC mahasiswa;`, `DESC mata_kuliah;`, `DESC irs;`
@@ -366,22 +366,22 @@ and repeat the ones marked 📱 at mobile width (DevTools → device toolbar →
 
 **Application:**
 
-- [ ] 7. 📱 `/` — student list with data
-- [ ] 8. `/` when empty — empty state
+- [ ] 7. 📱 `/`, student list with data
+- [ ] 8. `/` when empty, empty state
 - [ ] 9. 📱 Add form, blank
-- [ ] 10. Add form submitted blank — errors on all four fields
-- [ ] 11. Add form with a duplicate NIM — "NIM sudah terdaftar" on the NIM field
+- [ ] 10. Add form submitted blank, errors on all four fields
+- [ ] 11. Add form with a duplicate NIM, "NIM sudah terdaftar" on the NIM field
 - [ ] 12. Green flash after a successful add
-- [ ] 13. 📱 Detail page for a student **with** courses — JOIN table with status badges
-- [ ] 14. Detail page for a student **without** courses — empty state
+- [ ] 13. 📱 Detail page for a student **with** courses, JOIN table with status badges
+- [ ] 14. Detail page for a student **without** courses, empty state
 - [ ] 15. Edit form pre-filled (NIM read-only)
 - [ ] 16. Delete confirmation dialog
-- [ ] 17. List after a delete — student gone, flash shown
-- [ ] 18. 404 page — open `/students/00000000`
+- [ ] 17. List after a delete, student gone and flash shown
+- [ ] 18. 404 page, open `/students/00000000`
 
 **Code and build:**
 
-- [ ] 19. `.\mvnw.cmd test` output — `Tests run: 51, Failures: 0, Errors: 0`
+- [ ] 19. `.\mvnw.cmd test` output, `Tests run: 51, Failures: 0, Errors: 0`
 - [ ] 20. `MahasiswaRepository.java`, the `SQL_FIND_DETAIL` JOIN query
 - [ ] 21. Project structure in the editor
 
@@ -394,9 +394,9 @@ and repeat the ones marked 📱 at mobile width (DevTools → device toolbar →
 
 | Symptom | Cause and fix |
 |---|---|
-| `Error: JAVA_HOME not found in your environment` | `JAVA_HOME` not set — see [Prerequisites](#prerequisites). |
-| `sqlplus : The term 'sqlplus' is not recognized` | Oracle not installed, or `PATH` not refreshed. See [Step 0](#step-0--install-oracle-xe); reopen PowerShell after installing. |
-| `The splatting operator '@' cannot be used...` | PowerShell: quote the argument — `"@schema.sql"`. See [Step 2](#step-2--run-schemasql-and-seedsql). |
+| `Error: JAVA_HOME not found in your environment` | `JAVA_HOME` not set. See [Prerequisites](#prerequisites). |
+| `sqlplus : The term 'sqlplus' is not recognized` | Oracle not installed, or `PATH` not refreshed. See [Step 0](#step-0-install-oracle-xe); reopen PowerShell after installing. |
+| `The splatting operator '@' cannot be used...` | PowerShell: quote the argument as `"@schema.sql"`. See [Step 2](#step-2-run-schemasql-and-seedsql). |
 | App starts but pages show "Gagal mengakses database" | Expected: HikariCP connects lazily, so startup succeeds even with Oracle down. Failure shows on the first data page. Check the Oracle service and the environment variables. |
 | `Could not resolve placeholder 'DB_URL'` at startup | Environment variables not set, or set in a different terminal. Set them in the same terminal, then re-run. |
 | `ORA-12541: TNS:no listener` | Oracle not running. Start `OracleServiceXE` and `OracleOraDB21Home1TNSListener` via `services.msc`. |
@@ -405,7 +405,7 @@ and repeat the ones marked 📱 at mobile width (DevTools → device toolbar →
 | `ORA-12514: service name not resolved` | Wrong service name in `DB_URL`. Try `XEPDB1`, or `XE` for Oracle 11g. |
 | Page shows "Gagal mengakses database" | Tables not created. Run `schema.sql` and `seed.sql`. |
 | `ORA-00942: table or view does not exist` | Scripts were run as a different user than `DB_USERNAME`. Use the same user for both. |
-| `SP2-0734: unknown command beginning "CONSTRAINT..."` while running `schema.sql` | SQL\*Plus treats a **blank line as end of statement**, cutting `CREATE TABLE` short. `schema.sql` sets `SET SQLBLANKLINES ON` to prevent this — this message means you are using an old copy of the script. |
+| `SP2-0734: unknown command beginning "CONSTRAINT..."` while running `schema.sql` | SQL\*Plus treats a **blank line as end of statement**, cutting `CREATE TABLE` short. `schema.sql` sets `SET SQLBLANKLINES ON` to prevent this, so this message means you are using an old copy of the script. |
 | `schema.sql` prints "Schema berhasil dibuat" but the tables are missing | Old script version kept going after an error. The current one uses `WHENEVER SQLERROR EXIT SQL.SQLCODE`. Verify with `SELECT table_name FROM user_tables;`. |
 | After adding a student the browser shows 404 although the data was saved | Old-version bug: Tomcat put `;jsessionid=...` in the redirect URL on a session's first request. Fixed via `server.servlet.session.tracking-modes=cookie` + `WebMvcConfig`, locked by a regression test. |
 | Plain, unstyled layout | No internet connection, so Bootstrap and Google Fonts from the CDN fail to load. Layout still works with fallback fonts. |
