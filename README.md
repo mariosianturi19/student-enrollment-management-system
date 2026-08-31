@@ -35,11 +35,13 @@ Oracle or it does not run.
 ```
 src/main/java/com/togar/studentenrollment/
 ├── controller/   HTTP routes only, no SQL and no business rules
-│   └── GlobalExceptionHandler   maps domain exceptions to 404 / error pages
+│   ├── GlobalExceptionHandler   maps domain exceptions to 404 / error pages
+│   └── api/      REST controller + its own advice returning JSON
 ├── service/      Business rules (duplicate NIM, missing NIM) + @Transactional
 ├── repository/   The only place SQL is written (JdbcTemplate)
 ├── model/        Records mirroring the tables (Mahasiswa, MataKuliah, Irs)
 ├── dto/          Form-binding object + JOIN result shape
+│   └── api/      Request, response, and error shapes for the REST layer
 ├── exception/    Domain exceptions (DuplicateNimException, MahasiswaNotFoundException)
 └── config/       WebBindingConfig (global input trimming), WebMvcConfig
 ```
@@ -75,6 +77,15 @@ Oracle has no `ON UPDATE CASCADE`. The edit form renders NIM read-only and the
 controller always takes NIM from the path, never the request body, so the
 primary key can never be rewritten, even by a tampered request.
 
+**Two exception advices, scoped rather than merged.** The HTML side turns failures
+into Thymeleaf pages; the API side has to turn the same failures into JSON. A single
+advice cannot do both, and letting the existing one win would hand an HTML 404 to a
+client that asked for JSON. So the API gets its own `@RestControllerAdvice`, limited
+to the `controller.api` package and given the higher precedence. The original advice
+stays global on purpose: it also handles `NoResourceFoundException`, which is thrown
+outside any controller when a URL is mistyped, and a package-scoped advice would
+never see it.
+
 ## Testing
 
 ```powershell
@@ -89,9 +100,10 @@ attempted, so `.\mvnw.cmd test` passes even with `DB_URL` / `DB_USERNAME` /
 | Class | Tests | Covers |
 |---|---|---|
 | `MahasiswaControllerTest` | 23 | Routes, redirects, HTTP status, per-field validation, POST-only delete, NIM-from-path invariant, `;jsessionid` URL regression |
+| `MahasiswaRestControllerTest` | 17 | Status codes, `Location` header, JSON shape, per-field validation errors, 409 on duplicate NIM, malformed JSON, NIM immutability |
 | `TemplateRenderingTest` | 12 | Thymeleaf templates actually render to HTML (not just view-name matching), including the error page when the database is down |
 | `MahasiswaServiceTest` | 16 | Business rules: duplicate NIM, missing NIM, total-SKS calculation, model/DTO helpers |
-| **Total** | **51** | |
+| **Total** | **68** | |
 
 ## Running it
 
@@ -136,6 +148,52 @@ Docker) plus a troubleshooting table are in
 
 Mutations are POST-only. Opening `/students/{nim}/delete` in a browser returns
 **405 Method Not Allowed**, not a deletion.
+
+### REST API
+
+The same data is also served as JSON under `/api/students`, backed by the same
+service, so the business rules are written once and neither entry point can drift
+from the other.
+
+| Method | Path | Success | Errors |
+|---|---|---|---|
+| `GET` | `/api/students` | `200` list, `[]` when empty | |
+| `GET` | `/api/students/{nim}` | `200` student + courses + `totalSks` | `404` |
+| `POST` | `/api/students` | `201` + `Location` header | `400` validation, `409` duplicate NIM |
+| `PUT` | `/api/students/{nim}` | `200` updated student | `400` validation, `404` |
+| `DELETE` | `/api/students/{nim}` | `204` no body | `404` |
+
+```bash
+curl http://localhost:8080/api/students/24060122001
+
+curl -X POST http://localhost:8080/api/students \
+  -H "Content-Type: application/json" \
+  -d '{"nim":"24060122010","nama":"Budi Santoso","angkatan":2024,"gender":"L"}'
+```
+
+Every failure returns the same shape, so a client needs one error path rather than
+one per status code. Validation failures add a `fieldErrors` map that points at the
+offending input directly, instead of a sentence the client would have to parse:
+
+```json
+{
+  "timestamp": "2026-08-31T10:15:30Z",
+  "status": 400,
+  "error": "Bad Request",
+  "message": "Data yang dikirim tidak valid",
+  "fieldErrors": { "nim": "NIM harus berupa 8 sampai 20 digit angka" }
+}
+```
+
+**A duplicate NIM answers `409`, not `400`.** The body is well-formed and passes
+every constraint; what conflicts is the state of the database, and the identical
+request could succeed once the clashing row is gone. That distinction is what `409`
+exists for.
+
+**`PUT` has no `nim` field.** NIM is the primary key and the identity of the
+student, and Oracle has no `ON UPDATE CASCADE`, so the update request shape simply
+omits it. The client cannot send it, does not have to wonder whether it would be
+honoured, and the path value is always what gets used.
 
 ## Data model
 
