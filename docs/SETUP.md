@@ -342,9 +342,10 @@ unset.
 | Class | Tests | Covers |
 |---|---|---|
 | `MahasiswaControllerTest` | 23 | Routes, redirects, HTTP status, per-field validation, POST-only delete, NIM-from-path invariant, `;jsessionid` regression |
+| `MahasiswaRestControllerTest` | 17 | Status codes, `Location` header, JSON shape, per-field validation errors, 409 on duplicate NIM, malformed JSON, NIM immutability |
 | `TemplateRenderingTest` | 12 | Thymeleaf templates render to HTML, including the error page when the database is down |
 | `MahasiswaServiceTest` | 16 | Business rules: duplicate NIM, missing NIM, total-SKS calculation |
-| **Total** | **51** | |
+| **Total** | **68** | |
 
 ---
 
@@ -381,7 +382,7 @@ and repeat the ones marked 📱 at mobile width (DevTools → device toolbar →
 
 **Code and build:**
 
-- [ ] 19. `.\mvnw.cmd test` output, `Tests run: 51, Failures: 0, Errors: 0`
+- [ ] 19. `.\mvnw.cmd test` output, `Tests run: 68, Failures: 0, Errors: 0`
 - [ ] 20. `MahasiswaRepository.java`, the `SQL_FIND_DETAIL` JOIN query
 - [ ] 21. Project structure in the editor
 
